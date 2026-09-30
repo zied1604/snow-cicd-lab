@@ -9,7 +9,7 @@ group: pr-checks-${{ github.event.number }}
 cancel-in-progress: true
 jobs:
 lint-python:
-runs-on: ubuntu-latest
+runs-on: ubuntu-24.04
 steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5
@@ -19,7 +19,7 @@ with: { python-version: "3.11", cache: pip }
 - run: ruff format --check python/
 - run: pytest
 lint-sql:
-runs-on: ubuntu-latest
+runs-on: ubuntu-24.04
 steps:
 - uses: actions/checkout@v4
 - uses: actions/setup-python@v5
@@ -27,7 +27,7 @@ with: { python-version: "3.11", cache: pip }
 - run: pip install sqlfluff
 - run: sqlfluff lint dbt/models
 secrets-scan:
-runs-on: ubuntu-latest
+runs-on: ubuntu-24.04
 permissions: { contents: read, pull-requests: read }
 steps:
 - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ with: { fetch-depth: 0 }
 env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
 dbt-ci:
 needs: [lint-python, lint-sql]
-runs-on: ubuntu-latest
+runs-on: ubuntu-24.04
 environment: dev
 env:
 DBT_PROFILES_DIR: dbt

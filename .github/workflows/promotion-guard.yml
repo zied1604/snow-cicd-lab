@@ -7,7 +7,7 @@ contents: read
 actions: read
 jobs:
 check-source:
-runs-on: ubuntu-latest
+runs-on: ubuntu-24.04
 steps:
 - name: Verifier la branche source
 env:
