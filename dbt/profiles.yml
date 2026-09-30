@@ -10,7 +10,7 @@ snowflake_project:
       role: CICD_ROLE
       warehouse: CICD_WH
       database: ANALYTICS_DEV
-      schema: PUBLIC
+      schema: STG_ANALYTICS
       threads: 4
 
     ci: # utilise par les PR : schema dedie a chaque PR, dans la base DEV

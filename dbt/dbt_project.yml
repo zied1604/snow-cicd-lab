@@ -35,7 +35,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 
 models:
-  staging:
-    # Applies to all files under models/example/
-    +materialized: table
-    +schema: STG_ANALYTICS
+  snowflake_project:
+    staging:
+      +materialized: table
+      +schema: STG_ANALYTICS
