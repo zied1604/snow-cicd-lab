@@ -1,58 +1,65 @@
 name: pr-checks
+
 on:
-pull_request:
-branches: [dev, uat, main]
+  pull_request:
+    branches: [dev, uat, main]
+
 permissions:
-contents: read
+  contents: read
+
 concurrency:
-group: pr-checks-${{ github.event.number }}
-cancel-in-progress: true
+  group: pr-checks-${{ github.event.number }}
+  cancel-in-progress: true
+
 jobs:
-lint-python:
-runs-on: ubuntu-24.04
-steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-python@v5
-with: { python-version: "3.11", cache: pip }
-- run: pip install ruff pytest
-- run: ruff check python/
-- run: ruff format --check python/
-- run: pytest
-lint-sql:
-runs-on: ubuntu-24.04
-steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-python@v5
-with: { python-version: "3.11", cache: pip }
-- run: pip install sqlfluff
-- run: sqlfluff lint dbt/models
-secrets-scan:
-runs-on: ubuntu-24.04
-permissions: { contents: read, pull-requests: read }
-steps:
-- uses: actions/checkout@v4
-with: { fetch-depth: 0 }
-- uses: gitleaks/gitleaks-action@v2
-env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
-dbt-ci:
-needs: [lint-python, lint-sql]
-runs-on: ubuntu-24.04
-environment: dev
-env:
-DBT_PROFILES_DIR: dbt
-SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-DBT_SCHEMA: CI_PR_${{ github.event.number }}
-steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-python@v5
-with: { python-version: "3.11", cache: pip }
-- run: pip install -r requirements.txt
-- name: Ecrire la cle privee
-env: { KEY: "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" }
-run: |
-printf '%s\n' "$KEY" > "$RUNNER_TEMP/rsa_key.p8"
-chmod 600 "$RUNNER_TEMP/rsa_key.p8"
-echo "SNOWFLAKE_PRIVATE_KEY_PATH=$RUNNER_TEMP/rsa_key.p8" >> "$GITHUB_ENV"
-- run: dbt deps --project-dir dbt
-- run: dbt build --project-dir dbt --target ci
+  lint-python:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install ruff pytest
+      - run: ruff check python/
+      - run: ruff format --check python/
+      - run: pytest
+
+  lint-sql:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install sqlfluff
+      - run: sqlfluff lint dbt/models
+
+  secrets-scan:
+    runs-on: ubuntu-24.04
+    permissions: { contents: read, pull-requests: read }
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+
+  dbt-ci:
+    needs: [lint-python, lint-sql]
+    runs-on: ubuntu-24.04
+    environment: dev
+    env:
+      DBT_PROFILES_DIR: dbt
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+      DBT_SCHEMA: CI_PR_${{ github.event.number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install -r requirements.txt
+      - name: Ecrire la cle privee
+        env: { KEY: "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" }
+        run: |
+          printf '%s\n' "$KEY" > "$RUNNER_TEMP/rsa_key.p8"
+          chmod 600 "$RUNNER_TEMP/rsa_key.p8"
+          echo "SNOWFLAKE_PRIVATE_KEY_PATH=$RUNNER_TEMP/rsa_key.p8" >> "$GITHUB_ENV"
+      - run: dbt deps --project-dir dbt
+      - run: dbt build --project-dir dbt --target ci
