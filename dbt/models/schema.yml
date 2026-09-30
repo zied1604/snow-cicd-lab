@@ -1,9 +1,10 @@
 version: 2
+
 models:
-- name: stg_customers
-description: Clients nettoyes
-columns:
-- name: customer_id
-tests: [not_null, unique]
-- name: country
-tests: [not_null]
+  - name: stg_customers
+    description: Clients nettoyes
+    columns:
+      - name: customer_id
+        data_tests: [not_null, unique]
+      - name: country
+        data_tests: [not_null]
