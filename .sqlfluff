@@ -1,0 +1,5 @@
+[sqlfluff]
+dialect = snowflake
+templater = jinja
+max_line_length = 120
+exclude = dbt/target, dbt/dbt_packages

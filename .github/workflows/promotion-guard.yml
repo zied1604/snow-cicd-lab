@@ -1,0 +1,30 @@
+name: promotion-guard
+on:
+pull_request:
+branches: [uat, main]
+permissions:
+contents: read
+actions: read
+jobs:
+check-source:
+runs-on: ubuntu-latest
+steps:
+- name: Verifier la branche source
+env:
+BASE: ${{ github.base_ref }}
+HEAD: ${{ github.head_ref }}
+run: |
+if [[ "$BASE" == "main" && "$HEAD" != "uat" && "$HEAD" != hotfix/* ]]; then
+echo "::error::Vers main, seule la branche uat (ou hotfix/*) est autorisee"; exit 1
+fi
+if [[ "$BASE" == "uat" && "$HEAD" != "dev" && "$HEAD" != hotfix/* ]]; then
+echo "::error::Vers uat, seule la branche dev (ou hotfix/*) est autorisee"; exit 1
+fi
+- name: Le dernier deploiement UAT doit etre vert (PR vers main)
+if: github.base_ref == 'main'
+env:
+GH_TOKEN: ${{ github.token }}
+run: |
+RES=$(gh run list -R "$GITHUB_REPOSITORY" --workflow deploy.yml --branch uat \
+--limit 1 --json conclusion --jq '.[0].conclusion')
+[ "$RES" = "success" ] || { echo "::error::Dernier deploiement uat : $RES"; exit 1; }

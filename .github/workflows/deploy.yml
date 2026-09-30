@@ -1,0 +1,34 @@
+name: deploy
+on:
+push:
+branches: [dev, uat, main]
+permissions:
+contents: read
+jobs:
+deploy:
+runs-on: ubuntu-latest
+environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
+concurrency:
+group: deploy-${{ github.ref_name }}
+cancel-in-progress: false
+env:
+DBT_PROFILES_DIR: dbt
+SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+with: { python-version: "3.11", cache: pip }
+- run: pip install -r requirements.txt
+- name: Choisir la cible dbt
+run: |
+if [ "$GITHUB_REF_NAME" = "main" ]; then T=prod; else T="$GITHUB_REF_NAME"; fi
+echo "DBT_TARGET=$T" >> "$GITHUB_ENV"
+- name: Ecrire la cle privee
+env: { KEY: "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" }
+run: |
+printf '%s\n' "$KEY" > "$RUNNER_TEMP/rsa_key.p8"
+chmod 600 "$RUNNER_TEMP/rsa_key.p8"
+echo "SNOWFLAKE_PRIVATE_KEY_PATH=$RUNNER_TEMP/rsa_key.p8" >> "$GITHUB_ENV"
+- run: dbt deps --project-dir dbt
+- run: dbt build --project-dir dbt --target "$DBT_TARGET"

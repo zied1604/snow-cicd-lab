@@ -1,0 +1,26 @@
+name: ci-cleanup
+on:
+pull_request:
+types: [closed]
+branches: [dev, uat, main]
+jobs:
+drop-schema:
+runs-on: ubuntu-latest
+environment: dev
+env:
+DBT_PROFILES_DIR: dbt
+SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+with: { python-version: "3.11", cache: pip }
+- run: pip install dbt-snowflake
+- name: Ecrire la cle privee
+env: { KEY: "${{ secrets.SNOWFLAKE_PRIVATE_KEY }}" }
+run: |
+printf '%s\n' "$KEY" > "$RUNNER_TEMP/rsa_key.p8"
+echo "SNOWFLAKE_PRIVATE_KEY_PATH=$RUNNER_TEMP/rsa_key.p8" >> "$GITHUB_ENV"
+- run: >
+dbt run-operation drop_ci_schema --project-dir dbt --target ci
+--args "{schema_name: CI_PR_${{ github.event.number }}}"

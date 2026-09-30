@@ -1,0 +1,24 @@
+name: branch-name-check
+on:
+pull_request:
+branches: [dev, uat, main]
+types: [opened, reopened, synchronize]
+jobs:
+check-name:
+runs-on: ubuntu-latest
+steps:
+- name: Verifier le nom de la branche
+env:
+BRANCH: ${{ github.head_ref }}
+run: |
+# branches autorisees sans regle (promotion et bots)
+if [[ "$BRANCH" == "dev" || "$BRANCH" == "uat" || "$BRANCH" == dependabot/* ]]; then
+exit 0
+fi
+REGEX='^(feature|fix|hotfix|chore|docs|refactor)/'
+REGEX+='[A-Z][A-Z0-9]+-[0-9]+-[a-z0-9]+(-[a-z0-9]+)*$'
+if [[ ! "$BRANCH" =~ $REGEX ]]; then
+echo "::error::Nom invalide : $BRANCH"
+echo "Format attendu : feature/PROJ-123-description-courte"
+exit 1
+fi
