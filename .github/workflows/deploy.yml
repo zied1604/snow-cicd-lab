@@ -13,7 +13,7 @@ jobs:
     environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
     concurrency:
       group: deploy-${{ github.ref_name }}
-      cancel-in-progress: false
+      cancel-in-progress: true
     env:
       DBT_PROFILES_DIR: dbt
       SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
