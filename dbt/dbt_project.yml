@@ -38,3 +38,4 @@ models:
   staging:
     # Applies to all files under models/example/
     +materialized: table
+    +schema: STG_ANALYTICS
