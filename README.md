@@ -1,10 +1,3 @@
-# snow-cicd-lab v1
-
-[![deploy](https://github.com/ton-pseudo/snow-cicd-lab/actions/workflows/deploy.yml/badge.svg)](https://github.com/ton-pseudo/snow-cicd-lab/actions/workflows/deploy.yml)
-[![pr-checks](https://github.com/ton-pseudo/snow-cicd-lab/actions/workflows/pr-checks.yml/badge.svg)](https://github.com/ton-pseudo/snow-cicd-lab/actions/workflows/pr-checks.yml)
-
----
-
 ## Table des matieres
 
 1. [Vue d'ensemble](#1-vue-densemble)
