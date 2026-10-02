@@ -6,9 +6,3 @@ select = ["E", "F", "I", "B"]
 [tool.pytest.ini_options]
 testpaths = ["python/tests"]
 pythonpath = ["python/src"]
-# python/src/utils.py
-def normalize_country(code: str) -> str:
-return code.strip().upper()
-# python/tests/test_utils.py
-from utils import normalize_country
-def test_normalize_country():
